@@ -1,0 +1,9 @@
+model Conversation {
+  id           String @id @default(auto()) @map("_id") @db.ObjectId
+  isGroup      Boolean @default(false)
+
+  participants ConversationParticipant[]
+  messages     Message[]
+
+  createdAt    DateTime @default(now())
+}

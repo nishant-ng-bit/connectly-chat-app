@@ -1,0 +1,11 @@
+model User {
+  id           String @id @default(auto()) @map("_id")  @db.ObjectId
+  username     String @unique
+  email        String @unique
+  password     String?
+
+  participants ConversationParticipant[]
+  messages     Message[]
+
+  createdAt    DateTime @default(now())
+}
