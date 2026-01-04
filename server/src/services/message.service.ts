@@ -12,3 +12,13 @@ export const sendMessage = async ({ senderId, receiverId, content }: msg) => {
     data: { senderId, content, conversationId: conversation.id },
   });
 };
+
+export const getMessages = async ({ currentUserId, otherUserId }) => {
+  const conversation = await findOrCreateConversation(
+    currentUserId,
+    otherUserId
+  );
+  return prisma.message.findMany({
+    where: { conversationId: conversation.id },
+  });
+};

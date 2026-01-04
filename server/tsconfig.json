@@ -1,0 +1,9 @@
+{
+  "include": ["src"],
+  "compilerOptions": {
+    "esModuleInterop": true,
+    // Express is a CommonJS module, and enabling esModuleInterop allows clean default
+    // imports while maintaining compatibility.
+    "allowSyntheticDefaultImports": true
+  }
+}

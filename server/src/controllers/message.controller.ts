@@ -1,5 +1,5 @@
 import express from "express";
-import { sendMessage } from "../services/message.service";
+import { getMessages, sendMessage } from "../services/message.service";
 
 export const sendMessageHandler = async (
   req: express.Request,
@@ -11,5 +11,18 @@ export const sendMessageHandler = async (
   } catch (error) {
     console.log(error);
     return res.status(500).json({ error: "Something went wrong" });
+  }
+};
+
+export const getMessagesHandler = async (
+  req: express.Request,
+  res: express.Response
+) => {
+  try {
+    const messages = await getMessages(req.body);
+    return res.status(200).json(messages);
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ error: "Failed to fetch messages" });
   }
 };

@@ -29,3 +29,28 @@ export const findOrCreateConversation = async (
     },
   });
 };
+
+export const getChatUsers = async (currentUserId: string) => {
+  return prisma.conversationParticipant.findMany({
+    where: {
+      conversation: {
+        participants: {
+          some: { userId: currentUserId },
+        },
+      },
+      userId: {
+        not: currentUserId,
+      },
+    },
+    select: {
+      user: {
+        select: {
+          id: true,
+          username: true,
+          email: true,
+        },
+      },
+    },
+    distinct: ["userId"],
+  });
+};

@@ -27,7 +27,6 @@ export const verifyOTP = async (email: string, otp: string) => {
       },
     });
 
-    console.log(otpData);
     if (!otpData) {
       console.log("OTP not found");
       return false;
