@@ -43,14 +43,20 @@ export const getChatUsers = async (currentUserId: string) => {
       },
     },
     select: {
-      user: {
-        select: {
-          id: true,
-          username: true,
-          email: true,
-        },
-      },
+      user: true, //Selecting everything of other user eg id, username, email ...
     },
     distinct: ["userId"],
   });
+};
+
+export const getConversationId = async (
+  currentUserId: string,
+  otherUserId: string
+) => {
+  const conversation = await findOrCreateConversation(
+    currentUserId,
+    otherUserId
+  );
+  console.log("conversation", conversation);
+  return conversation.id;
 };

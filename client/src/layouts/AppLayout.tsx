@@ -1,8 +1,9 @@
 import { Outlet } from "react-router-dom";
 import Navbar from "../components/Navbar";
+
 const AppLayout = () => {
   return (
-    <div className="h-screen flex flex-col">
+    <div className="h-screen flex flex-col overflow-hidden">
       <Navbar />
       <div className="flex-1 overflow-hidden">
         <Outlet />

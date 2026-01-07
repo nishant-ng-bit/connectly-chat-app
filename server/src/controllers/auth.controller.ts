@@ -40,13 +40,13 @@ export const login = async (req: express.Request, res: express.Response) => {
       return res.status(401).json({ message: "User Already LoggedIN" });
     }
     const { email } = req.body;
-    const userByEmail = await getUserByEmail(email);
+    const user = await getUserByEmail(email);
 
-    if (!userByEmail) {
+    if (!user) {
       return res.status(401).json({ message: "User Not Exist" });
     }
 
-    const id = userByEmail.id;
+    const id = user.id;
 
     const jwtToken = generateToken(id);
     res.cookie("token", jwtToken, {
@@ -56,7 +56,7 @@ export const login = async (req: express.Request, res: express.Response) => {
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days,
     });
 
-    return res.status(200).json({ message: "Login successful" });
+    return res.status(200).json(user);
   } catch (error) {
     console.log(error);
     return res.status(500).json({ error: "Something went wrong" });

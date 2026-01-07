@@ -6,15 +6,21 @@ type User = {
   username: string;
   email: string;
   otp: string;
+  profilePic?: string | null;
+  status: string;
+  lastSeen: string;
 };
 
 type AuthContextType = {
+  setUser: React.Dispatch<React.SetStateAction<User | null>>;
   user: User | null;
   isAuthenticated: boolean;
+  isloading: boolean;
 };
 
 export const AuthContext = createContext<AuthContextType | null>(null);
 const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+  const [isloading, setIsloading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
   const fetchUser = async () => {
     try {
@@ -22,6 +28,8 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setUser(res.data.user);
     } catch (error) {
       console.log(error);
+    } finally {
+      setIsloading(false);
     }
   };
 
@@ -30,7 +38,14 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated: !!user }}>
+    <AuthContext.Provider
+      value={{
+        setUser,
+        user,
+        isAuthenticated: !!user,
+        isloading,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

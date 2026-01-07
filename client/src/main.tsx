@@ -4,12 +4,15 @@ import "./index.css";
 import App from "./App.tsx";
 import { ToastContainer } from "react-toastify";
 import AuthProvider from "./providers/AuthProvider.tsx";
+import PresenceProvider from "./providers/PresenceProvider.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <AuthProvider>
     <StrictMode>
-      <App />
-      <ToastContainer />
+      <PresenceProvider>
+        <App />
+        <ToastContainer />
+      </PresenceProvider>
     </StrictMode>
   </AuthProvider>
 );

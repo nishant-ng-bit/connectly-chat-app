@@ -1,4 +1,5 @@
 import prisma from "../lib/prisma";
+import { uploader } from "./uploader.service";
 interface user {
   username: string;
   email: string;
@@ -10,6 +11,7 @@ export const createUser = async ({ username, email, password }: user) => {
       username,
       email,
       password,
+      status: "Hi! I'm using Connectly",
     },
   });
 
@@ -40,5 +42,44 @@ export const getUserById = async (id: string) => {
       id: id,
     },
   });
+  return user;
+};
+
+export const getUserByQuery = async (username: string) => {
+  if (!username || username.trim().length === 0) {
+    console.log("Returning empty array");
+    return [];
+  }
+
+  return prisma.user.findMany({
+    where: {
+      username: {
+        startsWith: username.trim(),
+        mode: "insensitive",
+      },
+    },
+    select: {
+      id: true,
+      username: true,
+      email: true,
+    },
+    take: 10,
+  });
+};
+
+export const setProfilePic = async (
+  userId: string,
+  file: Express.Multer.File
+) => {
+  const res = await uploader(file);
+  const user = await prisma.user.update({
+    where: {
+      id: userId,
+    },
+    data: {
+      profilePic: res.secure_url,
+    },
+  });
+
   return user;
 };

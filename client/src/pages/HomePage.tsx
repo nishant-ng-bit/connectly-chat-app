@@ -2,53 +2,73 @@ import { Link } from "react-router-dom";
 
 const HomePage = () => {
   return (
-    <div className="min-h-screen bg-amber-50">
-      <section className="flex flex-col items-center justify-center text-center px-6 py-20">
-        <h1 className="text-4xl sm:text-5xl font-bold text-amber-900">
-          Welcome to <span className="text-amber-700">Connectly 🤝</span>
-        </h1>
+    <div className="min-h-screen bg-slate-950 text-gray-100 overflow-auto">
+      {/* Hero Section */}
+      <section className="relative overflow-hidden">
+        <div className="absolute inset-0 bg-linear-to-br from-indigo-600/20 via-purple-600/10 to-transparent" />
+        <div className="relative max-w-5xl mx-auto px-6 py-28 text-center">
+          <h1 className="text-4xl sm:text-5xl font-bold tracking-tight">
+            Welcome to{" "}
+            <span className="bg-linear-to-r from-indigo-400 to-purple-500 bg-clip-text text-transparent">
+              Connectly
+            </span>{" "}
+            🤝
+          </h1>
 
-        <p className="mt-4 max-w-xl text-amber-800 text-lg">
-          Connect instantly. Chat securely. Simple, fast, and built for real
-          conversations.
-        </p>
+          <p className="mt-6 max-w-2xl mx-auto text-lg text-gray-400">
+            Connect instantly. Chat securely. Simple, fast, and built for real
+            conversations.
+          </p>
 
-        <div className="mt-8 flex flex-col sm:flex-row gap-4">
-          <Link
-            to="/chats"
-            className="bg-amber-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-amber-700 transition"
-          >
-            Open Chats
-          </Link>
+          <div className="mt-10 flex flex-col sm:flex-row justify-center gap-4">
+            <Link
+              to="/chats"
+              className="
+                px-6 py-3 rounded-xl
+                bg-indigo-600 hover:bg-indigo-700
+                text-white font-medium
+                transition
+              "
+            >
+              Open Chats
+            </Link>
 
-          <Link
-            to="/profile"
-            className="border border-amber-600 text-amber-700 px-6 py-3 rounded-lg font-semibold hover:bg-amber-100 transition"
-          >
-            View Profile
-          </Link>
+            <Link
+              to="/profile"
+              className="
+                px-6 py-3 rounded-xl
+                bg-slate-800 hover:bg-slate-700
+                text-gray-200 font-medium
+                border border-slate-700
+                transition
+              "
+            >
+              View Profile
+            </Link>
+          </div>
         </div>
       </section>
 
-      <section className="max-w-5xl mx-auto px-6 pb-20 grid grid-cols-1 sm:grid-cols-3 gap-6">
-        <div className="bg-white p-6 rounded-xl shadow">
-          <h3 className="font-semibold text-amber-900 text-lg">⚡ Fast</h3>
-          <p className="text-amber-700 mt-2">
-            Real-time messaging with smooth performance.
+      {/* Features Section */}
+      <section className="max-w-6xl mx-auto px-6 pb-24 grid grid-cols-1 sm:grid-cols-3 gap-6">
+        <div className="bg-slate-900 border border-slate-800 p-6 rounded-2xl">
+          <h3 className="font-semibold text-lg text-indigo-400">⚡ Fast</h3>
+          <p className="text-gray-400 mt-2">
+            Real-time messaging with smooth performance and low latency.
           </p>
         </div>
 
-        <div className="bg-white p-6 rounded-xl shadow">
-          <h3 className="font-semibold text-amber-900 text-lg">🔐 Secure</h3>
-          <p className="text-amber-700 mt-2">
-            JWT + HTTP-only cookies for secure authentication.
+        <div className="bg-slate-900 border border-slate-800 p-6 rounded-2xl">
+          <h3 className="font-semibold text-lg text-indigo-400">🔐 Secure</h3>
+          <p className="text-gray-400 mt-2">
+            JWT & HTTP-only cookies ensure strong authentication security.
           </p>
         </div>
 
-        <div className="bg-white p-6 rounded-xl shadow">
-          <h3 className="font-semibold text-amber-900 text-lg">🤝 Simple</h3>
-          <p className="text-amber-700 mt-2">
-            Clean UI focused on conversations, not clutter.
+        <div className="bg-slate-900 border border-slate-800 p-6 rounded-2xl">
+          <h3 className="font-semibold text-lg text-indigo-400">🤝 Simple</h3>
+          <p className="text-gray-400 mt-2">
+            Clean, minimal UI focused entirely on conversations.
           </p>
         </div>
       </section>

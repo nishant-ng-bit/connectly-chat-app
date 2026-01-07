@@ -6,11 +6,13 @@ interface user {
   otp: string;
 }
 export const registerUser = async (data: user) => {
-  return await axiosInstance.post("/auth/register", data);
+  const res = await axiosInstance.post("/auth/register", data);
+  return res;
 };
 
 export const loginUser = async (data: user) => {
-  return await axiosInstance.post("/auth/login", data);
+  const res = await axiosInstance.post("/auth/login", data);
+  return res;
 };
 
 export const logoutUser = async () => {

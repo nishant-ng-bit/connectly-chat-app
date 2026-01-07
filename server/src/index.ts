@@ -3,6 +3,8 @@ import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import indexRoute from "./routes/index.route";
 import cors from "cors";
+import { initSocket } from "./socket/index";
+import http from "http";
 
 dotenv.config();
 const app = express();
@@ -16,8 +18,11 @@ app.use(
   })
 );
 
+const server = http.createServer(app);
+initSocket(server);
+
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`server started on port ${PORT}`);
 });
 

@@ -1,8 +1,17 @@
-import { HomePage, LoginPage, RegisterPage } from "./pages";
+import {
+  HomePage,
+  LoginPage,
+  RegisterPage,
+  ChatsPage,
+  ProfilePage,
+} from "./pages";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import ChatsPage from "./pages/ChatsPage";
 import AppLayout from "./layouts/AppLayout";
+import ProtectedRoute from "./components/ProtectedRoute";
+import { useAuth } from "./providers/AuthProvider";
+
 const App = () => {
+  const { isloading } = useAuth();
   let router = createBrowserRouter([
     {
       element: <AppLayout />,
@@ -13,7 +22,19 @@ const App = () => {
         },
         {
           path: "/chats",
-          element: <ChatsPage />,
+          element: (
+            <ProtectedRoute>
+              <ChatsPage />
+            </ProtectedRoute>
+          ),
+        },
+        {
+          path: "/profile",
+          element: (
+            <ProtectedRoute>
+              <ProfilePage />
+            </ProtectedRoute>
+          ),
         },
       ],
     },
@@ -26,6 +47,7 @@ const App = () => {
       element: <RegisterPage />,
     },
   ]);
+  if (isloading) return <div className="bg-slate-900 h-screen">Loading...</div>;
   return <RouterProvider router={router} />;
 };
 

@@ -14,3 +14,10 @@ export const sendMessage = async (data: {
 }) => {
   return await axiosInstance.post("/msg/send", data);
 };
+
+export const deleteMsgForUser = async (data: {
+  messageId: string;
+  userId: string;
+}) => {
+  return await axiosInstance.post("/msg/delete", data);
+};

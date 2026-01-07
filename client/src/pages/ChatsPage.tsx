@@ -1,12 +1,17 @@
 import { useEffect, useState } from "react";
 import { getConversations } from "../api/conversation.api";
-import Conversation from "../components/Conversation";
+import { Conversation } from "../components/Conversation";
 import ChatSection from "../components/ChatSection";
+import SearchBox from "../components/SearchBox";
+import { getUserByQuery } from "../api/user.api";
 
 interface User {
   id: string;
   username: string;
   email: string;
+  profilePic: string;
+  status: string;
+  lastSeen: string;
 }
 
 interface ConversationItem {
@@ -16,6 +21,25 @@ interface ConversationItem {
 const ChatsPage = () => {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [conversations, setConversations] = useState<ConversationItem[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<User[]>([]);
+
+  const handleSearch = async () => {
+    try {
+      if (!searchQuery.trim()) {
+        setSearchResults([]);
+        return;
+      }
+      const res = await getUserByQuery(searchQuery);
+      setSearchResults(res.data);
+    } catch (error) {
+      console.log("Error searching for users:", error);
+    }
+  };
+
+  useEffect(() => {
+    handleSearch();
+  }, [searchQuery]);
 
   useEffect(() => {
     const fetchConversations = async () => {
@@ -31,20 +55,54 @@ const ChatsPage = () => {
   }, []);
 
   return (
-    <div className="flex h-full">
-      <ul className="w-[25%] h-full overflow-y-auto bg-gray-900 ">
-        {conversations.map((item) => (
-          <Conversation
-            key={item.user.id}
-            user={item.user}
-            setSelectedUser={setSelectedUser}
-          />
-        ))}
-      </ul>
+    <div className="flex h-full bg-slate-950">
+      {/* SideBar*/}
+      <aside
+        className={`sm:w-[320px] w-full flex-col border-r border-slate-800 ${
+          selectedUser ? "hidden sm:flex" : ""
+        }`}
+      >
+        <SearchBox searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
 
-      <div className="flex-1 h-full min-h-0">
+        <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-700">
+          {searchQuery ? (
+            searchResults.length > 0 ? (
+              searchResults.map((user) => (
+                <Conversation
+                  key={user.id}
+                  user={user}
+                  setSelectedUser={setSelectedUser}
+                  isActive={selectedUser?.id === user.id}
+                />
+              ))
+            ) : (
+              <p className="px-4 py-6 text-sm text-gray-400 text-center">
+                No users found
+              </p>
+            )
+          ) : conversations.length > 0 ? (
+            conversations.map((item) => (
+              <Conversation
+                key={item.user.id}
+                user={item.user}
+                setSelectedUser={setSelectedUser}
+                isActive={selectedUser?.id === item.user.id}
+              />
+            ))
+          ) : (
+            <p className="px-4 py-6 text-sm text-gray-400 text-center">
+              No conversations yet
+            </p>
+          )}
+        </div>
+      </aside>
+
+      <main
+        className={`flex-1 min-w-0 
+        ${selectedUser ? "" : "hidden sm:flex"}`}
+      >
         <ChatSection selectedUser={selectedUser} />
-      </div>
+      </main>
     </div>
   );
 };

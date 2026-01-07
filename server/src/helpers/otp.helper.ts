@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 export const otpHandler = async (email: string) => {
   const otp = generateOTP();
 
+  console.log("otp", otp);
   const hashedOTP = await bcrypt.hash(otp, 10);
   const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10minutes
 
@@ -27,6 +28,7 @@ export const verifyOTP = async (email: string, otp: string) => {
       },
     });
 
+    console.log("otpData", otpData);
     if (!otpData) {
       console.log("OTP not found");
       return false;

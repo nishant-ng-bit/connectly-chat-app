@@ -1,5 +1,9 @@
 import express from "express";
-import { getMessages, sendMessage } from "../services/message.service";
+import {
+  deleteMsgForUser,
+  getMessages,
+  sendMessage,
+} from "../services/message.service";
 
 export const sendMessageHandler = async (
   req: express.Request,
@@ -24,5 +28,19 @@ export const getMessagesHandler = async (
   } catch (error) {
     console.log(error);
     return res.status(500).json({ error: "Failed to fetch messages" });
+  }
+};
+
+export const deleteMsgForUserHandler = async (
+  req: express.Request,
+  res: express.Response
+) => {
+  try {
+    const message = await deleteMsgForUser(req.body);
+    console.log("inside controller", message);
+    return res.status(200).json({ message: "Message deleted successfully" });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ error: "Failed to delete message" });
   }
 };

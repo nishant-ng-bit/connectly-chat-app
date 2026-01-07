@@ -7,6 +7,7 @@ export const verifyOtpMiddleware = async (
   next: express.NextFunction
 ) => {
   try {
+    console.log(req.body.email, req.body.otp);
     const isVerified = await verifyOTP(req.body.email, req.body.otp);
     if (!isVerified) {
       return res.status(401).json({ message: "Invalid OTP" });

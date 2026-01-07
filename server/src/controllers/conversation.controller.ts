@@ -1,5 +1,8 @@
 import express from "express";
-import { getChatUsers } from "../services/conversation.service";
+import {
+  getChatUsers,
+  getConversationId,
+} from "../services/conversation.service";
 
 export const getConversationsHandler = async (
   req: express.Request,
@@ -23,6 +26,25 @@ export const getConversationsHandler = async (
 
     return res.status(500).json({
       error: "Failed to fetch conversations",
+    });
+  }
+};
+
+export const getConversationIdHandler = async (
+  req: express.Request,
+  res: express.Response
+) => {
+  try {
+    console.log("req params", req.query);
+    const conversationId = await getConversationId(
+      req.query.currentUserId as string,
+      req.query.otherUserId as string
+    );
+
+    return res.status(200).json(conversationId);
+  } catch (error) {
+    return res.status(500).json({
+      error: "Failed to fetch conversation id",
     });
   }
 };
