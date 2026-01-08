@@ -17,7 +17,6 @@ const RegisterPage = () => {
 
   const [otp, setOtp] = useState("");
 
-  // register page if already logged in
   useEffect(() => {
     if (isAuthenticated) {
       navigate("/", { replace: true });
@@ -52,44 +51,53 @@ const RegisterPage = () => {
       if (axios.isAxiosError(error)) {
         toast.error(error.response?.data?.error || "Registration failed");
       }
+      console.error(error);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-950 px-4">
+    <div
+      className="
+        min-h-screen flex items-center justify-center px-4
+        bg-gray-50 dark:bg-slate-950
+        transition-colors
+      "
+    >
       <form
         onSubmit={submitHandler}
         className="
           w-full max-w-md
-          bg-slate-900 border border-slate-800
+          bg-white dark:bg-slate-900
+          border border-gray-200 dark:border-slate-800
           rounded-2xl shadow-xl
           p-8 flex flex-col gap-4
         "
       >
-        {/* Header */}
         <div className="text-center mb-2">
-          <h1 className="text-2xl font-semibold text-gray-100">
+          <h1 className="text-2xl font-semibold text-slate-900 dark:text-gray-100">
             Create an account ✨
           </h1>
-          <p className="text-sm text-gray-400 mt-1">
+          <p className="text-sm text-slate-600 dark:text-gray-400 mt-1">
             Join and start chatting instantly
           </p>
         </div>
 
-        {/* Username */}
         <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-gray-300">Username</label>
+          <label className="text-sm font-medium text-slate-700 dark:text-gray-300">
+            Username
+          </label>
           <input
             type="text"
             name="username"
             placeholder="your_username"
             onChange={updateData}
             className="
-              bg-slate-800 text-gray-100
+              bg-gray-100 dark:bg-slate-800
+              text-slate-900 dark:text-gray-100
               px-4 py-2.5 rounded-lg
-              border border-slate-700
+              border border-gray-300 dark:border-slate-700
               outline-none
-              placeholder-gray-500
+              placeholder-slate-400 dark:placeholder-gray-500
               focus:ring-2 focus:ring-indigo-500
               focus:border-indigo-500
               transition
@@ -97,9 +105,8 @@ const RegisterPage = () => {
           />
         </div>
 
-        {/* Email */}
         <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-gray-300">
+          <label className="text-sm font-medium text-slate-700 dark:text-gray-300">
             Email address
           </label>
           <input
@@ -108,11 +115,12 @@ const RegisterPage = () => {
             placeholder="you@example.com"
             onChange={updateData}
             className="
-              bg-slate-800 text-gray-100
+              bg-gray-100 dark:bg-slate-800
+              text-slate-900 dark:text-gray-100
               px-4 py-2.5 rounded-lg
-              border border-slate-700
+              border border-gray-300 dark:border-slate-700
               outline-none
-              placeholder-gray-500
+              placeholder-slate-400 dark:placeholder-gray-500
               focus:ring-2 focus:ring-indigo-500
               focus:border-indigo-500
               transition
@@ -120,14 +128,13 @@ const RegisterPage = () => {
           />
         </div>
 
-        {/* OTP */}
         <OTP setOtp={setOtp} email={formData.email?.trim()} />
 
-        {/* Submit */}
         <button
           type="submit"
           className="
-            mt-2 bg-indigo-600 hover:bg-indigo-700
+            mt-2
+            bg-indigo-600 hover:bg-indigo-700
             text-white font-medium
             py-2.5 rounded-lg
             transition
@@ -136,12 +143,15 @@ const RegisterPage = () => {
           Register
         </button>
 
-        {/* Footer */}
-        <p className="text-center text-sm text-gray-400 mt-4">
+        <p className="text-center text-sm text-slate-600 dark:text-gray-400 mt-4">
           Already have an account?{" "}
           <Link
             to="/login"
-            className="text-indigo-400 hover:text-indigo-300 font-medium transition"
+            className="
+              text-indigo-600 dark:text-indigo-400
+              hover:text-indigo-500 dark:hover:text-indigo-300
+              font-medium transition
+            "
           >
             Login
           </Link>

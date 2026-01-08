@@ -15,6 +15,7 @@ interface User {
 }
 
 interface ConversationItem {
+  conversationId: string;
   user: User;
 }
 
@@ -23,6 +24,8 @@ const ChatsPage = () => {
   const [conversations, setConversations] = useState<ConversationItem[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<User[]>([]);
+
+  const [typingMap, setTypingMap] = useState<Record<string, Set<string>>>({});
 
   const handleSearch = async () => {
     try {
@@ -33,7 +36,7 @@ const ChatsPage = () => {
       const res = await getUserByQuery(searchQuery);
       setSearchResults(res.data);
     } catch (error) {
-      console.log("Error searching for users:", error);
+      console.error("Error searching for users:", error);
     }
   };
 
@@ -55,10 +58,9 @@ const ChatsPage = () => {
   }, []);
 
   return (
-    <div className="flex h-full bg-slate-950">
-      {/* SideBar*/}
-      <aside
-        className={`sm:w-[320px] w-full flex-col border-r border-slate-800 ${
+    <div className="flex h-full dark:bg-slate-950 bg-white">
+      <div
+        className={`sm:w-[320px] w-full flex-col border-r dark:border-slate-800 border-slate-200 ${
           selectedUser ? "hidden sm:flex" : ""
         }`}
       >
@@ -87,6 +89,7 @@ const ChatsPage = () => {
                 user={item.user}
                 setSelectedUser={setSelectedUser}
                 isActive={selectedUser?.id === item.user.id}
+                typing={!!typingMap[item.conversationId]?.size}
               />
             ))
           ) : (
@@ -95,13 +98,17 @@ const ChatsPage = () => {
             </p>
           )}
         </div>
-      </aside>
+      </div>
 
       <main
-        className={`flex-1 min-w-0 
+        className={`flex-1 min-w-0
         ${selectedUser ? "" : "hidden sm:flex"}`}
       >
-        <ChatSection selectedUser={selectedUser} />
+        <ChatSection
+          selectedUser={selectedUser}
+          typingMap={typingMap}
+          setTypingMap={setTypingMap}
+        />
       </main>
     </div>
   );

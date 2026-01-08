@@ -15,7 +15,7 @@ export const uploadToCloudinary = async (filePath: string) => {
 
     return res;
   } catch (error) {
-    console.log(error);
+    console.error(error);
     throw new Error("Cloudinary upload failed");
   }
 };

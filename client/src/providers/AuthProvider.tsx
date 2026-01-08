@@ -9,6 +9,7 @@ type User = {
   profilePic?: string | null;
   status: string;
   lastSeen: string;
+  createdAt: string;
 };
 
 type AuthContextType = {

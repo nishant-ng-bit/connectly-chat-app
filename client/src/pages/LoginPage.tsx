@@ -12,7 +12,6 @@ const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
 
-  //  Prevent logged-in users from seeing login page
   useEffect(() => {
     if (isAuthenticated) {
       navigate("/", { replace: true });
@@ -34,24 +33,35 @@ const LoginPage = () => {
       });
 
       setUser(res.data);
-
       toast.success("Logged in successfully");
       navigate("/", { replace: true });
-    } catch (error) {
-      toast.error("Invalid OTP or email");
-      console.log(error);
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Invalid OTP or email");
+      console.error(error);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-950 px-4">
-      <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl shadow-xl p-8">
+    <div
+      className="min-h-screen flex items-center justify-center px-4
+      bg-gray-50 dark:bg-slate-950
+      transition-colors"
+    >
+      <div
+        className="
+        w-full max-w-md
+        bg-white dark:bg-slate-900
+        border border-gray-200 dark:border-slate-800
+        rounded-2xl shadow-xl
+        p-8
+      "
+      >
         {/* Header */}
         <div className="text-center mb-6">
-          <h1 className="text-2xl font-semibold text-gray-100">
+          <h1 className="text-2xl font-semibold text-slate-900 dark:text-gray-100">
             Welcome back 👋
           </h1>
-          <p className="text-sm text-gray-400 mt-1">
+          <p className="text-sm text-slate-600 dark:text-gray-400 mt-1">
             Login to continue chatting
           </p>
         </div>
@@ -61,10 +71,11 @@ const LoginPage = () => {
           <div className="flex flex-col gap-1">
             <label
               htmlFor="email"
-              className="text-sm font-medium text-gray-300"
+              className="text-sm font-medium text-slate-700 dark:text-gray-300"
             >
               Email address
             </label>
+
             <input
               id="email"
               type="email"
@@ -72,11 +83,12 @@ const LoginPage = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="
-                bg-slate-800 text-gray-100
+                bg-gray-100 dark:bg-slate-800
+                text-slate-900 dark:text-gray-100
                 px-4 py-2.5 rounded-lg
-                border border-slate-700
+                border border-gray-300 dark:border-slate-700
                 outline-none
-                placeholder-gray-500
+                placeholder-slate-400 dark:placeholder-gray-500
                 focus:ring-2 focus:ring-indigo-500
                 focus:border-indigo-500
                 transition
@@ -91,7 +103,8 @@ const LoginPage = () => {
           <button
             type="submit"
             className="
-              mt-2 bg-indigo-600 hover:bg-indigo-700
+              mt-2
+              bg-indigo-600 hover:bg-indigo-700
               text-white font-medium
               py-2.5 rounded-lg
               transition
@@ -102,11 +115,15 @@ const LoginPage = () => {
         </form>
 
         {/* Footer */}
-        <p className="text-center text-sm text-gray-400 mt-6">
+        <p className="text-center text-sm text-slate-600 dark:text-gray-400 mt-6">
           New here?{" "}
           <Link
             to="/register"
-            className="text-indigo-400 hover:text-indigo-300 font-medium transition"
+            className="
+              text-indigo-600 dark:text-indigo-400
+              hover:text-indigo-500 dark:hover:text-indigo-300
+              font-medium transition
+            "
           >
             Create an account
           </Link>

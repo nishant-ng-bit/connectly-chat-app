@@ -39,13 +39,27 @@ export const initSocket = (server: http.Server) => {
     });
 
     socket.on("join:conversation", async (conversationId: string) => {
-      console.log("🟢 Socket joined conversation:", conversationId);
+      // console.log("🟢 Socket joined conversation:", conversationId);
       socket.join(conversationId);
     });
 
     socket.on("leave:conversation", (conversationId: string) => {
       socket.leave(conversationId);
-      console.log(`🟡 Socket ${socket.id} left room ${conversationId}`);
+      // console.log(`🟡 Socket ${socket.id} left room ${conversationId}`);
+    });
+
+    socket.on("typing:start", ({ conversationId }) => {
+      socket.to(conversationId).emit("typing:start", {
+        userId,
+        conversationId,
+      });
+    });
+
+    socket.on("typing:stop", ({ conversationId }) => {
+      socket.to(conversationId).emit("typing:stop", {
+        userId,
+        conversationId,
+      });
     });
 
     socket.on("disconnect", () => {

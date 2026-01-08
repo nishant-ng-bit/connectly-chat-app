@@ -15,3 +15,7 @@ export const getConversationId = async ({
     params: { currentUserId, otherUserId },
   });
 };
+
+export const clearConversation = async (conversationId: string) => {
+  return await axiosInstance.post(`/conversations/${conversationId}/clear`);
+};

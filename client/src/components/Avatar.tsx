@@ -1,15 +1,18 @@
+type AvatarSize = "sm" | "md" | "lg";
+
 type AvatarProps = {
   username: string;
-  size?: "sm" | "md" | "lg";
+  src?: string | null;
+  size?: AvatarSize;
 };
 
-const sizeMap = {
+const sizeMap: Record<AvatarSize, string> = {
   sm: "h-8 w-8 text-sm",
   md: "h-12 w-12 text-lg",
-  lg: "h-16 w-16 text-2xl",
+  lg: "h-24 w-24 text-2xl",
 };
 
-const Avatar = ({ username, size = "md" }: AvatarProps) => {
+const Avatar = ({ username, src, size = "md" }: AvatarProps) => {
   const letter = username?.charAt(0)?.toUpperCase() || "?";
 
   return (
@@ -18,16 +21,22 @@ const Avatar = ({ username, size = "md" }: AvatarProps) => {
       title={username}
       className={`
         ${sizeMap[size]}
-        rounded-full
-        bg-linear-to-br from-indigo-500 via-purple-500 to-pink-500
+        relative
         flex items-center justify-center
-        font-semibold text-white
+        rounded-full
+        overflow-hidden
+        select-none
         shadow-md
         ring-2 ring-white/10
-        select-none
+        bg-linear-to-br from-indigo-500 via-purple-500 to-pink-500
+        text-white font-semibold
       `}
     >
-      {letter}
+      {src ? (
+        <img src={src} alt={username} className="h-full w-full object-cover" />
+      ) : (
+        <span>{letter}</span>
+      )}
     </div>
   );
 };

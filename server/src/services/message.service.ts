@@ -38,7 +38,6 @@ export const getMessages = async ({ currentUserId, otherUserId }) => {
 };
 
 export const deleteMsgForUser = async ({ messageId, userId }) => {
-  console.log("inside ", messageId, userId);
   return prisma.message.update({
     where: { id: messageId },
     data: { deletedFor: { push: userId } },

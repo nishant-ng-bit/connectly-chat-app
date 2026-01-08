@@ -4,6 +4,7 @@ import {
   RegisterPage,
   ChatsPage,
   ProfilePage,
+  UserInfoPage,
 } from "./pages";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import AppLayout from "./layouts/AppLayout";
@@ -33,6 +34,14 @@ const App = () => {
           element: (
             <ProtectedRoute>
               <ProfilePage />
+            </ProtectedRoute>
+          ),
+        },
+        {
+          path: "/user/:id",
+          element: (
+            <ProtectedRoute>
+              <UserInfoPage />
             </ProtectedRoute>
           ),
         },

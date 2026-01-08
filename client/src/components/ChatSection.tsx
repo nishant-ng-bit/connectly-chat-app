@@ -1,13 +1,17 @@
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useAuth } from "../providers/AuthProvider";
 import { deleteMsgForUser, getMessages } from "../api/messages.api";
-import { getConversationId } from "../api/conversation.api";
+import { clearConversation, getConversationId } from "../api/conversation.api";
 import Message from "./Message";
 import { uploadMsgFileToCloudinary } from "../utils/cloudinary";
 import { socket } from "../socket";
 import ChatSectionSettings from "./ChatSectionSettings";
+import { CgSoftwareUpload } from "react-icons/cg";
+import { MdDeleteOutline } from "react-icons/md";
+import { toast } from "react-toastify";
+import Avatar from "./Avatar";
+import { Link } from "react-router-dom";
 
-/* ================= TYPES ================= */
 interface User {
   id: string;
   username: string;
@@ -28,9 +32,17 @@ interface Msg {
   createdAt: string;
 }
 
-/* ================= COMPONENT ================= */
-
-const ChatSection = ({ selectedUser }: { selectedUser: User | null }) => {
+const ChatSection = ({
+  selectedUser,
+  typingMap,
+  setTypingMap,
+}: {
+  selectedUser: User | null;
+  typingMap: Record<string, Set<string>>;
+  setTypingMap: React.Dispatch<
+    React.SetStateAction<Record<string, Set<string>>>
+  >;
+}) => {
   const { user } = useAuth();
   if (!user) return null;
 
@@ -38,17 +50,13 @@ const ChatSection = ({ selectedUser }: { selectedUser: User | null }) => {
   const [text, setText] = useState("");
   const [conversationId, setConversationId] = useState<string | null>(null);
 
-  /* media preview */
   const [previewFile, setPreviewFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
 
-  /* scroll to bottom */
   const bottomRef = useRef<HTMLDivElement | null>(null);
   const prevConversationRef = useRef<string | null>(null);
 
-  /* ================= MESSAGE HANDLERS ================= */
-  // Select Messages for deletion
   const [selectionMode, setSelectionMode] = useState(false);
   const [selectedMessages, setSelectedMessages] = useState<Set<string>>(
     new Set()
@@ -58,7 +66,9 @@ const ChatSection = ({ selectedUser }: { selectedUser: User | null }) => {
     (msg) => !msg.deletedFor?.includes(user?.id) && !msg.deletedForAll
   );
 
-  const toggleSelectionMode = () => setSelectionMode(!selectionMode);
+  const toggleSelectionMode = () => {
+    setSelectionMode(!selectionMode);
+  };
   const toggleMessageSelection = (messageId: string) => {
     if (!selectionMode) return;
     setSelectedMessages((prev) => {
@@ -83,12 +93,9 @@ const ChatSection = ({ selectedUser }: { selectedUser: User | null }) => {
     } finally {
       setIsDeleting(false);
       setSelectedMessages(new Set());
+      toggleSelectionMode();
     }
   };
-
-  /* ================= MESSAGE INPUT ================= */
-
-  /* ================= SOCKET LISTENER ================= */
 
   useEffect(() => {
     if (!socket) return;
@@ -102,8 +109,6 @@ const ChatSection = ({ selectedUser }: { selectedUser: User | null }) => {
     };
   }, []);
 
-  /* ================= LOAD MESSAGES ================= */
-
   const loadMessages = async () => {
     if (!user || !selectedUser) return;
 
@@ -114,8 +119,6 @@ const ChatSection = ({ selectedUser }: { selectedUser: User | null }) => {
 
     setMessages(res.data || []);
   };
-
-  /* ================= INIT CONVERSATION ================= */
 
   useEffect(() => {
     if (!user || !selectedUser || !socket) return;
@@ -155,8 +158,6 @@ const ChatSection = ({ selectedUser }: { selectedUser: User | null }) => {
     };
   }, [selectedUser, user]);
 
-  /* ================= SEND TEXT ================= */
-
   const sendText = () => {
     if (!text.trim() || !conversationId || !user || !selectedUser || !socket)
       return;
@@ -171,8 +172,6 @@ const ChatSection = ({ selectedUser }: { selectedUser: User | null }) => {
 
     setText("");
   };
-
-  /* ================= FILE SELECT ================= */
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -194,19 +193,16 @@ const ChatSection = ({ selectedUser }: { selectedUser: User | null }) => {
     setPreviewUrl(URL.createObjectURL(file));
   };
 
-  /* ================= SEND MEDIA WITH FAKE PROGRESS ================= */
-
   const sendMedia = async () => {
     if (!previewFile || !user || !selectedUser || !conversationId || !socket)
       return;
 
     try {
-      setUploadProgress(5); // start the progress bar
+      setUploadProgress(5);
 
-      // Simulate progress while backend uploads
       const progressInterval = setInterval(() => {
         setUploadProgress((prev) => {
-          if (prev >= 90) return prev; // stop at 90% until upload finishes
+          if (prev >= 90) return prev;
           return prev + 5;
         });
       }, 200);
@@ -214,17 +210,16 @@ const ChatSection = ({ selectedUser }: { selectedUser: User | null }) => {
       const res = await uploadMsgFileToCloudinary(previewFile);
 
       clearInterval(progressInterval);
-      setUploadProgress(100); // finish progress
+      setUploadProgress(100);
 
       socket.emit("message:send", {
         senderId: user.id,
         receiverId: selectedUser.id,
         conversationId,
-        type: res.resource_type, // image | video
+        type: res.resource_type,
         mediaUrl: res.secure_url,
       });
 
-      // reset after a short delay
       setTimeout(() => {
         setPreviewFile(null);
         setPreviewUrl(null);
@@ -237,13 +232,10 @@ const ChatSection = ({ selectedUser }: { selectedUser: User | null }) => {
     }
   };
 
-  /* ================= AUTOSCROLL ================= */
-
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "instant" });
   }, [messages]);
 
-  /* ================= MESSAGES SEEN ================= */
   useEffect(() => {
     if (!conversationId) return;
 
@@ -307,7 +299,94 @@ const ChatSection = ({ selectedUser }: { selectedUser: User | null }) => {
     };
   }, []);
 
-  /* ================= UI ================= */
+  const typingTimeoutRef = useRef<any | null>(null);
+  const isTypingRef = useRef(false);
+
+  const handleTyping = () => {
+    if (!conversationId || !socket) return;
+
+    if (!isTypingRef.current) {
+      isTypingRef.current = true;
+      socket.emit("typing:start", { conversationId });
+    }
+
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+
+    typingTimeoutRef.current = setTimeout(() => {
+      isTypingRef.current = false;
+      socket.emit("typing:stop", { conversationId });
+    }, 1000);
+  };
+
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleTypingStart = ({
+      conversationId,
+      userId,
+    }: {
+      conversationId: string;
+      userId: string;
+    }) => {
+      setTypingMap((prev) => {
+        const next = { ...prev };
+        if (!next[conversationId]) {
+          next[conversationId] = new Set();
+        }
+        next[conversationId].add(userId);
+        return next;
+      });
+    };
+
+    const handleTypingStop = ({
+      conversationId,
+      userId,
+    }: {
+      conversationId: string;
+      userId: string;
+    }) => {
+      setTypingMap((prev) => {
+        const next = { ...prev };
+        next[conversationId]?.delete(userId);
+        if (next[conversationId]?.size === 0) {
+          delete next[conversationId];
+        }
+        return next;
+      });
+    };
+
+    socket.on("typing:start", handleTypingStart);
+    socket.on("typing:stop", handleTypingStop);
+
+    return () => {
+      socket.off("typing:start", handleTypingStart);
+      socket.off("typing:stop", handleTypingStop);
+    };
+  }, []);
+
+  if (!selectedUser) return null;
+  const isOtherUserTyping =
+    conversationId && typingMap[conversationId]?.has(selectedUser.id);
+
+  const handleClearConversation = async (): Promise<void> => {
+    try {
+      if (!conversationId) return;
+
+      await clearConversation(conversationId);
+      setMessages([]);
+
+      toast.success("Conversation cleared successfully");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to clear conversation");
+    } finally {
+      setIsDeleting(false);
+      setSelectionMode(false);
+      setSelectedMessages(new Set());
+    }
+  };
 
   if (!selectedUser) {
     return (
@@ -318,39 +397,53 @@ const ChatSection = ({ selectedUser }: { selectedUser: User | null }) => {
   }
 
   return (
-    <div className="flex flex-col h-full bg-slate-950 text-gray-100">
-      {/* Header */}
-      <div className="px-6 py-4 border-b border-slate-800 flex justify-between">
-        <div>
-          <h1 className="font-semibold">{selectedUser.username}</h1>
-          <p className="text-xs text-gray-400">{selectedUser.email}</p>
+    <div className="flex flex-col h-full bg-white text-black dark:bg-slate-950 dark:text-gray-100 ">
+      <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex justify-between">
+        <div className="flex items-center gap-2">
+          <Link to={`/user/${selectedUser.id}`}>
+            <Avatar
+              size="sm"
+              username={selectedUser.username}
+              src={selectedUser.profilePic}
+            />
+          </Link>
+
+          <div>
+            <h1 className="font-semibold">{selectedUser.username}</h1>
+            <p className="text-xs text-gray-400">{selectedUser.email}</p>
+            {isOtherUserTyping && (
+              <p className="text-xs text-indigo-500">typing…</p>
+            )}
+          </div>
         </div>
 
-        <div className="flex">
-          <button
-            className={`text-white ${
-              selectionMode ? "bg-red-500" : "bg-gray-500"
-            }`}
-            onClick={toggleSelectionMode}
-          >
-            MODE
-          </button>
-          <ChatSectionSettings />
-
+        <div className="flex gap-2 items-center justify-center">
           {selectionMode && selectedMessages.size > 0 && (
             <button
               disabled={isDeleting}
               type="button"
-              onClick={() => deleteSelectedMessages()}
-              className="text-red-500"
+              onClick={() => {
+                deleteSelectedMessages();
+              }}
+              className="text-red-500 text-2xl"
             >
-              DELETE
+              {isDeleting ? (
+                <div className="text-xl">"Deleting..."</div>
+              ) : (
+                <MdDeleteOutline />
+              )}
             </button>
           )}
+
+          <ChatSectionSettings
+            toggleSelectionMode={toggleSelectionMode}
+            handleClearConversation={handleClearConversation}
+            isDeleting={isDeleting}
+            setIsDeleting={setIsDeleting}
+          />
         </div>
       </div>
 
-      {/* Messages */}
       <div className="flex-1 overflow-y-auto px-6 py-4 space-y-3">
         {visibleMessages.map((msg) => {
           const isSelected = selectedMessages.has(msg.id);
@@ -359,21 +452,25 @@ const ChatSection = ({ selectedUser }: { selectedUser: User | null }) => {
             <div
               onClick={() => toggleMessageSelection(msg.id)}
               key={msg.id}
-              className={`flex ${
+              className={`flex gap-2 ${
                 msg.senderId === user?.id ? "justify-end" : "justify-start"
-              } ${isSelected ? "bg-slate-800 cursor-pointer" : ""}
+              } ${
+                isSelected
+                  ? "dark:bg-slate-800 bg-slate-400 rounded-md cursor-pointer"
+                  : ""
+              }
               }`}
             >
+              {selectionMode && <input checked={isSelected} type="checkbox" />}
               <Message msg={msg} isMe={msg.senderId === user?.id} />
             </div>
           );
         })}
-        <div ref={bottomRef} />
+        <div className="" ref={bottomRef} />
       </div>
 
-      {/* Preview & Progress */}
       {previewUrl && (
-        <div className="px-4 py-3 border-t border-slate-800">
+        <div className="px-4 py-3 border-t text-white dark:border-slate-800 border-slate-200">
           {previewFile?.type.startsWith("image") && (
             <img src={previewUrl} className="max-w-xs rounded-lg mb-2" />
           )}
@@ -386,7 +483,6 @@ const ChatSection = ({ selectedUser }: { selectedUser: User | null }) => {
             />
           )}
 
-          {/* Progress bar */}
           {uploadProgress > 0 && (
             <div className="h-1 bg-slate-700 rounded mb-2">
               <div
@@ -396,29 +492,30 @@ const ChatSection = ({ selectedUser }: { selectedUser: User | null }) => {
             </div>
           )}
 
-          <div className="flex gap-2 mt-2">
-            <button
-              onClick={sendMedia}
-              className="bg-indigo-600 px-4 py-1 rounded"
-            >
-              Send
-            </button>
-            <button
-              onClick={() => {
-                setPreviewFile(null);
-                setPreviewUrl(null);
-                setUploadProgress(0);
-              }}
-              className="bg-slate-700 px-4 py-1 rounded"
-            >
-              Cancel
-            </button>
-          </div>
+          {uploadProgress === 0 && (
+            <div className="flex gap-2 mt-2">
+              <button
+                onClick={sendMedia}
+                className="bg-indigo-600 px-4 py-1 rounded"
+              >
+                Send
+              </button>
+              <button
+                onClick={() => {
+                  setPreviewFile(null);
+                  setPreviewUrl(null);
+                  setUploadProgress(0);
+                }}
+                className="bg-slate-700 px-4 py-1 rounded"
+              >
+                Cancel
+              </button>
+            </div>
+          )}
         </div>
       )}
 
-      {/* Input */}
-      <div className="px-4 py-3 border-t border-slate-800">
+      <div className="px-4 py-3 border-t dark:border-slate-800 border-slate-200 ">
         <div className="flex items-center gap-3">
           <input
             id="file"
@@ -430,22 +527,26 @@ const ChatSection = ({ selectedUser }: { selectedUser: User | null }) => {
 
           <label
             htmlFor="file"
-            className="px-3 py-2 rounded-full bg-slate-800 cursor-pointer hover:bg-slate-700"
+            className="px-3 py-2 text-xl rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 cursor-pointer dark:hover:bg-slate-700 text-black dark:text-white transition-colors"
           >
-            📎
+            <CgSoftwareUpload />
           </label>
 
           <input
             value={text}
-            onChange={(e) => setText(e.target.value)}
+            onChange={(e) => {
+              setText(e.target.value);
+              handleTyping();
+            }}
             onKeyDown={(e) => e.key === "Enter" && sendText()}
             placeholder="Type a message..."
-            className="flex-1 bg-slate-800 px-4 py-2 rounded-full outline-none"
+            className="flex-1 bg-slate-100 text-black dark:text-slate-300 dark:bg-slate-800 px-4 py-2 rounded-full outline-none transition-colors"
           />
 
           <button
+            type="button"
             onClick={sendText}
-            className="bg-indigo-600 px-5 py-2 rounded-full"
+            className="dark:bg-indigo-600 bg-slate-200 text-black dark:text-white px-5 py-2 rounded-full transition-colors"
           >
             Send
           </button>

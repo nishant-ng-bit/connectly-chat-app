@@ -42,7 +42,6 @@ const OTP = ({ setOtp, email }: OtpProps) => {
       </label>
 
       <div className="flex flex-col sm:flex-row gap-3">
-        {/* OTP Input */}
         <input
           type="text"
           maxLength={6}
@@ -50,9 +49,11 @@ const OTP = ({ setOtp, email }: OtpProps) => {
           onChange={(e) => setOtp(e.target.value)}
           className="
             flex-1
-            bg-slate-800 text-gray-100
+            bg-slate-100 text-black
+            dark:bg-slate-800 dark:text-gray-100
             px-4 py-3 rounded-xl
-            border border-slate-700
+            border border-slate-400
+            dark:border-slate-700
             text-center tracking-[0.4em] text-lg font-semibold
             placeholder-gray-500
             outline-none
@@ -62,7 +63,6 @@ const OTP = ({ setOtp, email }: OtpProps) => {
           "
         />
 
-        {/* Send OTP Button */}
         <button
           type="button"
           disabled={otpSent}
@@ -83,7 +83,6 @@ const OTP = ({ setOtp, email }: OtpProps) => {
         </button>
       </div>
 
-      {/* Retry timer */}
       {otpSent && (
         <p className="text-xs text-gray-400 text-center sm:text-left">
           Didn’t receive OTP?{" "}

@@ -36,8 +36,7 @@ export const deleteMsgForUserHandler = async (
   res: express.Response
 ) => {
   try {
-    const message = await deleteMsgForUser(req.body);
-    console.log("inside controller", message);
+    await deleteMsgForUser(req.body);
     return res.status(200).json({ message: "Message deleted successfully" });
   } catch (error) {
     console.log(error);

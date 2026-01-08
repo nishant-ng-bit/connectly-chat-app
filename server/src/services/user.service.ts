@@ -42,12 +42,15 @@ export const getUserById = async (id: string) => {
       id: id,
     },
   });
+
+  if (!user) {
+    return null;
+  }
   return user;
 };
 
 export const getUserByQuery = async (username: string) => {
   if (!username || username.trim().length === 0) {
-    console.log("Returning empty array");
     return [];
   }
 
@@ -72,7 +75,7 @@ export const setProfilePic = async (
   file: Express.Multer.File
 ) => {
   const res = await uploader(file);
-  const user = await prisma.user.update({
+  const updatedUser = await prisma.user.update({
     where: {
       id: userId,
     },
@@ -81,5 +84,5 @@ export const setProfilePic = async (
     },
   });
 
-  return user;
+  return updatedUser;
 };

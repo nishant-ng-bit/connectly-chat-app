@@ -69,7 +69,7 @@ export const logout = async (req: express.Request, res: express.Response) => {
       return res.status(401).json({ message: "Invalid req" });
     }
     res.clearCookie("token");
-    res.status(200).json({ error: "Successfully logout" });
+    res.status(200).json({ message: "Successfully logout" });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: "Something went wrong" });

@@ -15,3 +15,7 @@ export const setProfilePic = async (userId: string, profilePic: File) => {
     },
   });
 };
+
+export const getUserById = async (userId: string) => {
+  return await axiosInstance.get(`/user/${userId}`);
+};

@@ -7,7 +7,7 @@ export const uploader = async (file: Express.Multer.File) => {
 
     return res;
   } catch (error) {
-    console.log(error);
+    console.error(error);
     throw new Error("Cloudinary upload failed");
   } finally {
     fs.unlinkSync(file.path);

@@ -43,7 +43,8 @@ export const getChatUsers = async (currentUserId: string) => {
       },
     },
     select: {
-      user: true, //Selecting everything of other user eg id, username, email ...
+      conversationId: true,
+      user: true,
     },
     distinct: ["userId"],
   });
@@ -59,4 +60,14 @@ export const getConversationId = async (
   );
   console.log("conversation", conversation);
   return conversation.id;
+};
+
+export const clearConversation = async (
+  conversationId: string,
+  userId: string
+) => {
+  return prisma.message.updateMany({
+    where: { conversationId },
+    data: { deletedFor: { push: userId } },
+  });
 };

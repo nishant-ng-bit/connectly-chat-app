@@ -40,12 +40,11 @@ export const markMessagesAsSeenSocket = async (
   userId: string
 ) => {
   if (!conversationId) {
-    console.log("conversationId not found");
-    return;
+    return console.error("No conversationId provided");
   }
   const seenAt = new Date();
 
-  const res = await prisma.message.updateMany({
+  await prisma.message.updateMany({
     where: {
       conversationId,
       senderId: { not: userId },
@@ -54,7 +53,6 @@ export const markMessagesAsSeenSocket = async (
     data: { seenAt },
   });
 
-  console.log("res", res);
   socket.to(conversationId).emit("messages:seen", {
     conversationId,
     seenAt,
