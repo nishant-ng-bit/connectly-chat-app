@@ -13,7 +13,7 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: process.env.CLIENT_URL,
     credentials: true,
   })
 );
@@ -21,8 +21,8 @@ app.use(
 const server = http.createServer(app);
 initSocket(server);
 
-const PORT = process.env.PORT || 3001;
-server.listen(PORT, () => {
+const PORT = Number(process.env.PORT) || 3001;
+server.listen(PORT, "0.0.0.0", () => {
   console.log(`server started on port ${PORT}`);
 });
 

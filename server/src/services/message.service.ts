@@ -27,7 +27,13 @@ export const sendMessage = async ({
   });
 };
 
-export const getMessages = async ({ currentUserId, otherUserId }) => {
+export const getMessages = async ({
+  currentUserId,
+  otherUserId,
+}: {
+  currentUserId: string;
+  otherUserId: string;
+}) => {
   const conversation = await findOrCreateConversation(
     currentUserId,
     otherUserId
@@ -37,7 +43,13 @@ export const getMessages = async ({ currentUserId, otherUserId }) => {
   });
 };
 
-export const deleteMsgForUser = async ({ messageId, userId }) => {
+export const deleteMsgForUser = async ({
+  messageId,
+  userId,
+}: {
+  messageId: string;
+  userId: string;
+}) => {
   return prisma.message.update({
     where: { id: messageId },
     data: { deletedFor: { push: userId } },

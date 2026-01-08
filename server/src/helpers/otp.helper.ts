@@ -2,21 +2,26 @@ import { generateOTP, sendOTP } from "../services/mail.service";
 import prisma from "../lib/prisma";
 import bcrypt from "bcryptjs";
 export const otpHandler = async (email: string) => {
-  const otp = generateOTP();
+  try {
+    const otp = generateOTP();
+    console.log("OTP:", otp);
 
-  const hashedOTP = await bcrypt.hash(otp, 10);
-  const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+    const hashedOTP = await bcrypt.hash(otp, 10);
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
 
-  await prisma.otp.deleteMany({ where: { email } });
-  await prisma.otp.create({
-    data: {
-      email,
-      hashedOTP,
-      expiresAt,
-    },
-  });
+    await prisma.otp.deleteMany({ where: { email } });
+    await prisma.otp.create({
+      data: {
+        email,
+        hashedOTP,
+        expiresAt,
+      },
+    });
 
-  await sendOTP(email, otp);
+    await sendOTP(email, otp);
+  } catch (error) {
+    console.error("Something went wrong", error);
+  }
 };
 
 export const verifyOTP = async (email: string, otp: string) => {

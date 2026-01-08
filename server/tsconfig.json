@@ -1,9 +1,19 @@
 {
-  "include": ["src"],
   "compilerOptions": {
+    "target": "ES2020",
+    "module": "CommonJS",
+    "lib": ["ES2020"],
+    "rootDir": "src",
+    "outDir": "dist",
+
+    "strict": true,
+    "skipLibCheck": true,
+
     "esModuleInterop": true,
-    // Express is a CommonJS module, and enabling esModuleInterop allows clean default
-    // imports while maintaining compatibility.
-    "allowSyntheticDefaultImports": true
-  }
+    "forceConsistentCasingInFileNames": true,
+    "moduleResolution": "node",
+    "resolveJsonModule": true
+  },
+  "include": ["src"],
+  "exclude": ["node_modules", "dist"]
 }

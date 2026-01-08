@@ -10,7 +10,7 @@ export const uploaderHandler = async (
 
     if (!file) return res.status(400).json({ message: "No file uploaded" });
 
-    const data = await uploader(req.file);
+    const data = await uploader(file);
 
     return res.status(200).json(data);
   } catch (error) {

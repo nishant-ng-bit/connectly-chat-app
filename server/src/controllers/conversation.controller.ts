@@ -55,7 +55,7 @@ export const clearConversationHandler = async (
 ) => {
   try {
     const { conversationId } = req.params;
-    const userId = req.user.id;
+    const userId = req.user?.id;
     if (!conversationId || !userId)
       return res.status(400).json({ message: "Bad request" });
 
