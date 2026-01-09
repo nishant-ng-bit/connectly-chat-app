@@ -15,7 +15,10 @@ export const sendMessage = async ({
   mediaUrl,
   type,
 }: msg) => {
-  const conversation = await findOrCreateConversation(senderId, receiverId);
+  const { conversation, isFirstMsg } = await findOrCreateConversation(
+    senderId,
+    receiverId
+  );
   const message = await prisma.message.create({
     data: {
       senderId,
@@ -26,7 +29,7 @@ export const sendMessage = async ({
     },
   });
 
-  return message;
+  return { message, isFirstMsg };
 };
 
 export const getMessages = async ({
@@ -36,7 +39,7 @@ export const getMessages = async ({
   currentUserId: string;
   otherUserId: string;
 }) => {
-  const conversation = await findOrCreateConversation(
+  const { conversation } = await findOrCreateConversation(
     currentUserId,
     otherUserId
   );

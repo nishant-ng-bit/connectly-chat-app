@@ -4,9 +4,15 @@ import prisma from "../lib/prisma";
 
 export const messageSocket = (io: Server, socket: Socket) => {
   socket.on("message:send", async (payload) => {
-    const message = await sendMessage(payload);
+    const { message, isFirstMsg } = await sendMessage(payload);
 
     const conversationId = message.conversationId;
+
+    if (isFirstMsg) {
+      io.to(payload.receiverId).emit("conversation:first-message", {
+        conversationId,
+      });
+    }
 
     io.to(conversationId).emit("message:new", message);
 

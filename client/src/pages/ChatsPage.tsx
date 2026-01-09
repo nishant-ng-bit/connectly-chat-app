@@ -4,6 +4,7 @@ import { Conversation } from "../components/Conversation";
 import ChatSection from "../components/ChatSection";
 import SearchBox from "../components/SearchBox";
 import { getUserByQuery } from "../api/user.api";
+import { socket } from "../socket";
 
 interface User {
   id: string;
@@ -44,17 +45,25 @@ const ChatsPage = () => {
     handleSearch();
   }, [searchQuery]);
 
-  useEffect(() => {
-    const fetchConversations = async () => {
-      try {
-        const res = await getConversations();
-        setConversations(res.data);
-      } catch (error) {
-        console.error("Failed to fetch conversations", error);
-      }
-    };
+  const fetchConversations = async () => {
+    try {
+      const res = await getConversations();
+      setConversations(res.data);
+    } catch (error) {
+      console.error("Failed to fetch conversations", error);
+    }
+  };
 
+  useEffect(() => {
     fetchConversations();
+  }, []);
+
+  useEffect(() => {
+    socket.on("conversation:first-message", fetchConversations);
+
+    return () => {
+      socket.off("conversation:first-message", fetchConversations);
+    };
   }, []);
 
   return (
