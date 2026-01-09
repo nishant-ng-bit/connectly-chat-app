@@ -16,7 +16,7 @@ export const sendMessage = async ({
   type,
 }: msg) => {
   const conversation = await findOrCreateConversation(senderId, receiverId);
-  return prisma.message.create({
+  const message = await prisma.message.create({
     data: {
       senderId,
       content: content || null,
@@ -25,6 +25,8 @@ export const sendMessage = async ({
       type,
     },
   });
+
+  return message;
 };
 
 export const getMessages = async ({

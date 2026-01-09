@@ -4,11 +4,11 @@ import prisma from "../lib/prisma";
 
 export const messageSocket = (io: Server, socket: Socket) => {
   socket.on("message:send", async (payload) => {
-    const { conversationId } = payload;
+    const message = await sendMessage(payload);
 
-    const msg = await sendMessage(payload);
+    const conversationId = message.conversationId;
 
-    io.to(conversationId).emit("message:new", msg);
+    io.to(conversationId).emit("message:new", message);
 
     const room = io.sockets.adapter.rooms.get(conversationId);
     const someoneElseInRoom =
@@ -19,13 +19,13 @@ export const messageSocket = (io: Server, socket: Socket) => {
 
       prisma.message
         .update({
-          where: { id: msg.id },
+          where: { id: message.id },
           data: { seenAt },
         })
         .then(() => {
           io.to(conversationId).emit("message:seen", {
             conversationId,
-            messageId: msg.id,
+            messageId: message.id,
             seenAt,
           });
         })

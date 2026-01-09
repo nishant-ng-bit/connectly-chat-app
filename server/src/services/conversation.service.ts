@@ -4,7 +4,7 @@ export const findOrCreateConversation = async (
   senderId: string,
   receiverId: string
 ) => {
-  const conversation = await prisma.conversation.findFirst({
+  let conversation = await prisma.conversation.findFirst({
     where: {
       participants: {
         some: { userId: senderId },
@@ -17,17 +17,17 @@ export const findOrCreateConversation = async (
     },
   });
 
-  if (conversation) {
-    return conversation;
+  if (!conversation) {
+    conversation = await prisma.conversation.create({
+      data: {
+        participants: {
+          create: [{ userId: senderId }, { userId: receiverId }],
+        },
+      },
+    });
   }
 
-  return prisma.conversation.create({
-    data: {
-      participants: {
-        create: [{ userId: senderId }, { userId: receiverId }],
-      },
-    },
-  });
+  return conversation;
 };
 
 export const getChatUsers = async (currentUserId: string) => {
