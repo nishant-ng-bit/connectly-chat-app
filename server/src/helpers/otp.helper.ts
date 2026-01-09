@@ -18,7 +18,8 @@ export const otpHandler = async (email: string) => {
       },
     });
 
-    await sendOTP(email, otp);
+    // await sendOTP(email, otp);
+    return otp;
   } catch (error) {
     console.error("Something went wrong", error);
   }

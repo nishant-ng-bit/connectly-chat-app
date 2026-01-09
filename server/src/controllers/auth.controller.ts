@@ -24,7 +24,9 @@ export const register = async (req: express.Request, res: express.Response) => {
     res.cookie("token", jwtToken, {
       httpOnly: true,
       secure: true,
-      sameSite: "strict",
+      sameSite: "none",
+      path: "/",
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days,
     });
 
     return res.status(201).json(user);
@@ -52,7 +54,8 @@ export const login = async (req: express.Request, res: express.Response) => {
     res.cookie("token", jwtToken, {
       httpOnly: true,
       secure: true,
-      sameSite: "strict",
+      sameSite: "none",
+      path: "/",
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days,
     });
 
@@ -68,7 +71,12 @@ export const logout = async (req: express.Request, res: express.Response) => {
     if (!req.cookies.token) {
       return res.status(401).json({ message: "Invalid req" });
     }
-    res.clearCookie("token");
+    res.clearCookie("token", {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+      path: "/",
+    });
     res.status(200).json({ message: "Successfully logout" });
   } catch (error) {
     console.error(error);

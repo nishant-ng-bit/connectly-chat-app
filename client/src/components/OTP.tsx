@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { sendOtpHandler } from "../api/otp.api";
+import { requestOtp } from "../api/otp.api";
 
 type OtpProps = {
   setOtp: React.Dispatch<React.SetStateAction<string>>;
@@ -32,7 +32,8 @@ const OTP = ({ setOtp, email }: OtpProps) => {
       setOtpSent(false);
     }, duration * 1000);
 
-    await sendOtpHandler({ email });
+    const res = await requestOtp({ email });
+    console.log("OTP:", res.data);
   };
 
   return (
