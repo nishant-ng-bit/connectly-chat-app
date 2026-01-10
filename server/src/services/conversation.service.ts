@@ -5,18 +5,7 @@ export const findOrCreateConversation = async (
   receiverId: string
 ) => {
   let isFirstMsg = false;
-  let conversation = await prisma.conversation.findFirst({
-    where: {
-      participants: {
-        some: { userId: senderId },
-      },
-      AND: {
-        participants: {
-          some: { userId: receiverId },
-        },
-      },
-    },
-  });
+  let conversation = await findConversation(senderId, receiverId);
 
   if (!conversation) {
     isFirstMsg = true;
@@ -29,26 +18,59 @@ export const findOrCreateConversation = async (
     });
   }
 
+  conversation = await prisma.conversation.update({
+    where: { id: conversation.id },
+    data: { lastModified: new Date() },
+  });
+
   return { conversation, isFirstMsg };
 };
 
 export const getChatUsers = async (currentUserId: string) => {
-  return prisma.conversationParticipant.findMany({
+  const conversations = await prisma.conversation.findMany({
     where: {
-      conversation: {
-        participants: {
-          some: { userId: currentUserId },
-        },
+      participants: {
+        some: { userId: currentUserId },
       },
-      userId: {
-        not: currentUserId,
-      },
+    },
+    orderBy: {
+      lastModified: "desc",
     },
     select: {
-      conversationId: true,
-      user: true,
+      id: true,
+      participants: {
+        where: {
+          userId: { not: currentUserId },
+        },
+        select: {
+          user: true,
+        },
+      },
     },
-    distinct: ["userId"],
+  });
+
+  return conversations.map((conv) => ({
+    conversationId: conv.id,
+    user: conv.participants[0].user,
+  }));
+};
+
+export const findConversation = async (
+  senderId: string,
+  receiverId: string
+) => {
+  return await prisma.conversation.findFirst({
+    where: {
+      participants: {
+        some: { userId: senderId },
+      },
+      AND: {
+        participants: {
+          some: { userId: receiverId },
+        },
+      },
+    },
+    orderBy: { lastModified: "desc" },
   });
 };
 
@@ -56,12 +78,8 @@ export const getConversationId = async (
   currentUserId: string,
   otherUserId: string
 ) => {
-  const { conversation } = await findOrCreateConversation(
-    currentUserId,
-    otherUserId
-  );
-  console.log("conversation", conversation);
-  return conversation.id;
+  const conversation = await findConversation(currentUserId, otherUserId);
+  return conversation?.id;
 };
 
 export const clearConversation = async (

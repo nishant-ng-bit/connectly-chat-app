@@ -1,5 +1,8 @@
 import prisma from "../lib/prisma";
-import { findOrCreateConversation } from "./conversation.service";
+import {
+  findConversation,
+  findOrCreateConversation,
+} from "./conversation.service";
 
 interface msg {
   senderId: string;
@@ -39,10 +42,9 @@ export const getMessages = async ({
   currentUserId: string;
   otherUserId: string;
 }) => {
-  const { conversation } = await findOrCreateConversation(
-    currentUserId,
-    otherUserId
-  );
+  const conversation = await findConversation(currentUserId, otherUserId);
+
+  if (!conversation) return [];
   return prisma.message.findMany({
     where: { conversationId: conversation.id },
   });

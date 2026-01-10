@@ -59,15 +59,20 @@ const ChatsPage = () => {
   }, []);
 
   useEffect(() => {
-    socket.on("conversation:first-message", fetchConversations);
+    if (!socket) return;
 
+    const refresh = () => {
+      fetchConversations();
+    };
+
+    socket.on("conversation:updated", refresh);
     return () => {
-      socket.off("conversation:first-message", fetchConversations);
+      socket.off("conversation:updated", refresh);
     };
   }, []);
 
   return (
-    <div className="flex h-full dark:bg-slate-950 bg-white">
+    <div className="flex h-full dark:bg-slate-950 bg-white overflow-auto">
       <div
         className={`sm:w-[320px] w-full flex-col border-r dark:border-slate-800 border-slate-200 ${
           selectedUser ? "hidden sm:flex" : ""

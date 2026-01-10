@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { requestOtp } from "../api/otp.api";
+import { toast } from "react-toastify";
 
 type OtpProps = {
   setOtp: React.Dispatch<React.SetStateAction<string>>;
@@ -33,6 +34,7 @@ const OTP = ({ setOtp, email }: OtpProps) => {
     }, duration * 1000);
 
     const res = await requestOtp({ email });
+    toast.success(`Your OTP is ${res.data}`, { autoClose: false });
     console.log("OTP:", res.data);
   };
 

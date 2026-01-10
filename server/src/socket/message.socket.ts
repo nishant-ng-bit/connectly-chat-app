@@ -7,12 +7,9 @@ export const messageSocket = (io: Server, socket: Socket) => {
     const { message, isFirstMsg } = await sendMessage(payload);
 
     const conversationId = message.conversationId;
+    socket.join(conversationId);
 
-    if (isFirstMsg) {
-      io.to(payload.receiverId).emit("conversation:first-message", {
-        conversationId,
-      });
-    }
+    io.to(payload.receiverId).emit("conversation:updated", conversationId);
 
     io.to(conversationId).emit("message:new", message);
 

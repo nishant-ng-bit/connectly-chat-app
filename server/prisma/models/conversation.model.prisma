@@ -6,4 +6,5 @@ model Conversation {
   messages     Message[]
 
   createdAt    DateTime @default(now())
+  lastModified DateTime @default(now())
 }

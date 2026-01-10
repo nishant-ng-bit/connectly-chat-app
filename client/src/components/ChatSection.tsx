@@ -159,8 +159,7 @@ const ChatSection = ({
   }, [selectedUser, user]);
 
   const sendText = () => {
-    if (!text.trim() || !conversationId || !user || !selectedUser || !socket)
-      return;
+    if (!text.trim() || !user || !selectedUser || !socket) return;
 
     socket.emit("message:send", {
       senderId: user.id,
@@ -194,8 +193,7 @@ const ChatSection = ({
   };
 
   const sendMedia = async () => {
-    if (!previewFile || !user || !selectedUser || !conversationId || !socket)
-      return;
+    if (!previewFile || !user || !selectedUser || !socket) return;
 
     try {
       setUploadProgress(5);
@@ -303,11 +301,14 @@ const ChatSection = ({
   const isTypingRef = useRef(false);
 
   const handleTyping = () => {
-    if (!conversationId || !socket) return;
+    if (!socket || !selectedUser) return;
 
     if (!isTypingRef.current) {
       isTypingRef.current = true;
-      socket.emit("typing:start", { conversationId });
+
+      socket.emit("typing:start", {
+        receiverId: selectedUser.id,
+      });
     }
 
     if (typingTimeoutRef.current) {
@@ -316,42 +317,33 @@ const ChatSection = ({
 
     typingTimeoutRef.current = setTimeout(() => {
       isTypingRef.current = false;
-      socket.emit("typing:stop", { conversationId });
+
+      socket.emit("typing:stop", {
+        receiverId: selectedUser.id,
+      });
     }, 1000);
   };
 
   useEffect(() => {
     if (!socket) return;
 
-    const handleTypingStart = ({
-      conversationId,
-      userId,
-    }: {
-      conversationId: string;
-      userId: string;
-    }) => {
+    const handleTypingStart = ({ userId }: { userId: string }) => {
       setTypingMap((prev) => {
         const next = { ...prev };
-        if (!next[conversationId]) {
-          next[conversationId] = new Set();
+        if (!next[userId]) {
+          next[userId] = new Set();
         }
-        next[conversationId].add(userId);
+        next[userId].add(userId);
         return next;
       });
     };
 
-    const handleTypingStop = ({
-      conversationId,
-      userId,
-    }: {
-      conversationId: string;
-      userId: string;
-    }) => {
+    const handleTypingStop = ({ userId }: { userId: string }) => {
       setTypingMap((prev) => {
         const next = { ...prev };
-        next[conversationId]?.delete(userId);
-        if (next[conversationId]?.size === 0) {
-          delete next[conversationId];
+        next[userId]?.delete(userId);
+        if (next[userId]?.size === 0) {
+          delete next[userId];
         }
         return next;
       });
@@ -366,9 +358,8 @@ const ChatSection = ({
     };
   }, []);
 
-  if (!selectedUser) return null;
   const isOtherUserTyping =
-    conversationId && typingMap[conversationId]?.has(selectedUser.id);
+    selectedUser && typingMap[selectedUser.id]?.has(selectedUser.id);
 
   const handleClearConversation = async (): Promise<void> => {
     try {
