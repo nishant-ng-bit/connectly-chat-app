@@ -1,7 +1,18 @@
 node_modules
+
 # Keep environment variables out of version control
 .env
 .env.local
 
+*.js
+*.js.map
+
+# compiled output
+dist
+build
+out
+
 /generated/prisma
+
+
 
