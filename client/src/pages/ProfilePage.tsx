@@ -12,7 +12,6 @@ const ProfilePage = () => {
   const [preview, setPreview] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
-
   if (!user) {
     return (
       <div

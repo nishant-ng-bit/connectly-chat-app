@@ -5,6 +5,7 @@ import {
   ChatsPage,
   ProfilePage,
   UserInfoPage,
+  LoadingPage,
 } from "./pages";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import AppLayout from "./layouts/AppLayout";
@@ -56,7 +57,7 @@ const App = () => {
       element: <RegisterPage />,
     },
   ]);
-  if (isloading) return <div className="bg-slate-900 h-screen">Loading...</div>;
+  if (isloading) return <LoadingPage />;
   return <RouterProvider router={router} />;
 };
 

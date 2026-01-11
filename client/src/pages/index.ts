@@ -4,6 +4,7 @@ import RegisterPage from "./RegisterPage";
 import ChatsPage from "./ChatsPage";
 import ProfilePage from "./ProfilePage";
 import UserInfoPage from "./UserInfoPage";
+import LoadingPage from "./LoadingPage";
 export {
   HomePage,
   LoginPage,
@@ -11,4 +12,5 @@ export {
   ChatsPage,
   ProfilePage,
   UserInfoPage,
+  LoadingPage,
 };

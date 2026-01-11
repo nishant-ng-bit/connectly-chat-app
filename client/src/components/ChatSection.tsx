@@ -101,6 +101,10 @@ const ChatSection = ({
     if (!socket) return;
     const onNewMessage = (msg: Msg) => {
       setMessages((prev) => [...prev, msg]);
+
+      if (!conversationId) {
+        setConversationId(msg.conversationId);
+      }
     };
 
     socket.on("message:new", onNewMessage);
@@ -381,7 +385,7 @@ const ChatSection = ({
 
   if (!selectedUser) {
     return (
-      <div className="flex-1 flex items-center justify-center bg-slate-950 text-gray-400">
+      <div className="flex-1 flex items-center justify-center bg-slate-100 text-2xl font-medium text-dark dark:bg-slate-950 dark:text-gray-400">
         Start a conversation 🚀
       </div>
     );
