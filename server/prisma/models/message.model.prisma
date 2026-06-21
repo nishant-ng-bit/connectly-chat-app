@@ -16,4 +16,5 @@ model Message {
   deletedFor     String[]
 
   seenAt         DateTime?
+  reactions      Json?
 }

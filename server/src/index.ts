@@ -5,6 +5,7 @@ import indexRoute from "./routes/index.route";
 import cors from "cors";
 import { initSocket } from "./socket/index";
 import http from "http";
+import { ensureAIAssistantExists } from "./services/user.service";
 
 dotenv.config();
 const app = express();
@@ -22,8 +23,9 @@ const server = http.createServer(app);
 initSocket(server);
 
 const PORT = Number(process.env.PORT) || 3001;
-server.listen(PORT, "0.0.0.0", () => {
+server.listen(PORT, "0.0.0.0", async () => {
   console.log(`server started on port ${PORT}`);
+  await ensureAIAssistantExists();
 });
 
 app.use("/", indexRoute());

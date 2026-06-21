@@ -22,6 +22,7 @@ export const initSocket = (server: http.Server) => {
     const userId = socket.handshake.auth.userId;
     if (!userId) return;
     socket.join(userId);
+    socket.data.userId = userId;
 
     addOnlineUser(userId, socket.id);
 
@@ -47,11 +48,19 @@ export const initSocket = (server: http.Server) => {
       socket.leave(conversationId);
     });
 
-    socket.on("typing:start", ({ receiverId }) => {
+    socket.on("typing:start", ({ receiverId, conversationId }) => {
+      if (conversationId) {
+        socket.to(conversationId).emit("typing:start", { userId, conversationId });
+        return;
+      }
       socket.to(receiverId).emit("typing:start", { userId });
     });
 
-    socket.on("typing:stop", ({ receiverId }) => {
+    socket.on("typing:stop", ({ receiverId, conversationId }) => {
+      if (conversationId) {
+        socket.to(conversationId).emit("typing:stop", { userId, conversationId });
+        return;
+      }
       socket.to(receiverId).emit("typing:stop", { userId });
     });
 

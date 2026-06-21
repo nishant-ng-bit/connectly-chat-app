@@ -1,6 +1,9 @@
 model Conversation {
   id           String @id @default(auto()) @map("_id") @db.ObjectId
   isGroup      Boolean @default(false)
+  name         String?
+  image        String?
+  createdById  String? @db.ObjectId
 
   participants ConversationParticipant[]
   messages     Message[]

@@ -16,6 +16,25 @@ export const getConversationId = async ({
   });
 };
 
+export const createGroupConversation = async (data: {
+  name: string;
+  memberIds: string[];
+}) => {
+  return await axiosInstance.post("/conversations/groups", data);
+};
+
+export const renameGroupConversation = async (conversationId: string, name: string) => {
+  return await axiosInstance.patch(`/conversations/${conversationId}/groups`, { name });
+};
+
+export const addGroupMembers = async (conversationId: string, memberIds: string[]) => {
+  return await axiosInstance.post(`/conversations/${conversationId}/participants`, { memberIds });
+};
+
+export const removeGroupMember = async (conversationId: string, memberId: string) => {
+  return await axiosInstance.delete(`/conversations/${conversationId}/participants/${memberId}`);
+};
+
 export const clearConversation = async (conversationId: string) => {
   return await axiosInstance.post(`/conversations/${conversationId}/clear`);
 };

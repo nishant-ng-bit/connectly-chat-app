@@ -8,7 +8,7 @@ export const sendOtpHandler = async (
   try {
     const email: string = req.body.email;
     const otp = await otpHandler(email);
-    return res.status(200).json(otp);
+    return res.status(200).json({ message: "OTP sent successfully" });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ error: "Something went wrong" });

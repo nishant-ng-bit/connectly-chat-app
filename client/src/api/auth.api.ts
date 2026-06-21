@@ -23,3 +23,13 @@ export const getMe = async () => {
   const res = await axiosInstance.get("/auth/me");
   return res;
 };
+
+export const guestLogin = async () => {
+  const res = await axiosInstance.post("/auth/guest-login");
+  return res;
+};
+
+export const checkUsername = async (username: string) => {
+  const res = await axiosInstance.get(`/auth/check-username?username=${encodeURIComponent(username)}`);
+  return res.data as { available: boolean };
+};

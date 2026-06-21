@@ -27,8 +27,8 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       const res = await getMe();
       setUser(res.data.user);
-    } catch (error) {
-      console.log("Not authenticated");
+    } catch {
+      setUser(null);
     } finally {
       setIsloading(false);
     }

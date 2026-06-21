@@ -86,3 +86,40 @@ export const setProfilePic = async (
 
   return updatedUser;
 };
+
+export const ensureAIAssistantExists = async () => {
+  const aiId = "000000000000000000000000";
+  try {
+    const aiUser = await prisma.user.findUnique({
+      where: { id: aiId },
+    });
+
+    if (!aiUser) {
+      console.log("Creating Connectly AI user...");
+      await prisma.user.create({
+        data: {
+          id: aiId,
+          username: "Connectly AI",
+          email: "ai@connectly.com",
+          status: "Connectly AI Assistant ✨",
+          profilePic: "https://api.dicebear.com/7.x/bottts/svg?seed=connectly-ai",
+        },
+      });
+      console.log("Connectly AI user created successfully.");
+    } else if (aiUser.username !== "Connectly AI") {
+      console.log("Updating AI user to Connectly AI...");
+      await prisma.user.update({
+        where: { id: aiId },
+        data: {
+          username: "Connectly AI",
+          status: "Connectly AI Assistant ✨",
+          profilePic: "https://api.dicebear.com/7.x/bottts/svg?seed=connectly-ai",
+        },
+      });
+    }
+  } catch (error) {
+    console.error("Failed to ensure Connectly AI exists:", error);
+  }
+};
+
+
