@@ -24,15 +24,52 @@ const normalizeGuestKey = (value?: string) => {
   return /^[a-f0-9-]{36}$/i.test(value) ? value.toLowerCase() : null;
 };
 
+const guestAdjectives = [
+  "calm",
+  "bright",
+  "fresh",
+  "kind",
+  "swift",
+  "happy",
+  "soft",
+  "cool",
+  "sunny",
+  "neat",
+];
+const guestNouns = [
+  "spark",
+  "wave",
+  "leaf",
+  "note",
+  "pixel",
+  "beam",
+  "trail",
+  "cloud",
+  "bloom",
+  "echo",
+];
+
 const getGuestIdentity = (req: express.Request) => {
   const guestKey = normalizeGuestKey(req.cookies?.[guestCookieName]) ?? randomUUID();
-  const guestId = guestKey.replace(/-/g, "");
 
   return {
     guestKey,
-    username: `guest_${guestId}`,
     email: `guest-${guestKey}@guests.connectly.local`,
   };
+};
+
+const generateGuestUsername = async () => {
+  for (let attempt = 0; attempt < 20; attempt += 1) {
+    const adjective = guestAdjectives[Math.floor(Math.random() * guestAdjectives.length)];
+    const noun = guestNouns[Math.floor(Math.random() * guestNouns.length)];
+    const number = Math.floor(100 + Math.random() * 900);
+    const username = `${adjective}${noun}${number}`;
+
+    const existingUser = await getUserByUsername(username);
+    if (!existingUser) return username;
+  }
+
+  return `user${randomUUID().replace(/-/g, "").slice(0, 8)}`;
 };
 
 export const register = async (req: express.Request, res: express.Response) => {
@@ -98,7 +135,7 @@ export const guestLogin = async (req: express.Request, res: express.Response) =>
 
     if (!user) {
       user = await createUser({
-        username: guest.username,
+        username: await generateGuestUsername(),
         email: guest.email,
       });
     }
