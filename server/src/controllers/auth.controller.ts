@@ -1,4 +1,5 @@
 import express from "express";
+import { randomUUID } from "crypto";
 import {
   createUser,
   getUserByEmail,
@@ -7,6 +8,32 @@ import {
 } from "../services/user.service";
 import { generateToken, verifyToken } from "../services/auth.service";
 import { userReq } from "../interfaces/user.interface";
+
+const isProduction = process.env.NODE_ENV === "production";
+const authCookieOptions = {
+  httpOnly: true,
+  secure: isProduction,
+  sameSite: isProduction ? "none" : "lax",
+  path: "/",
+} as const;
+const authCookieMaxAge = 7 * 24 * 60 * 60 * 1000;
+const guestCookieName = "connectly_guest_id";
+
+const normalizeGuestKey = (value?: string) => {
+  if (!value) return null;
+  return /^[a-f0-9-]{36}$/i.test(value) ? value.toLowerCase() : null;
+};
+
+const getGuestIdentity = (req: express.Request) => {
+  const guestKey = normalizeGuestKey(req.cookies?.[guestCookieName]) ?? randomUUID();
+  const guestId = guestKey.replace(/-/g, "");
+
+  return {
+    guestKey,
+    username: `guest_${guestId}`,
+    email: `guest-${guestKey}@guests.connectly.local`,
+  };
+};
 
 export const register = async (req: express.Request, res: express.Response) => {
   try {
@@ -22,11 +49,8 @@ export const register = async (req: express.Request, res: express.Response) => {
 
     const jwtToken = generateToken(user.id);
     res.cookie("token", jwtToken, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "none",
-      path: "/",
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days,
+      ...authCookieOptions,
+      maxAge: authCookieMaxAge,
     });
 
     return res.status(201).json(user);
@@ -52,11 +76,8 @@ export const login = async (req: express.Request, res: express.Response) => {
 
     const jwtToken = generateToken(id);
     res.cookie("token", jwtToken, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "none",
-      path: "/",
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days,
+      ...authCookieOptions,
+      maxAge: authCookieMaxAge,
     });
 
     return res.status(200).json(user);
@@ -71,24 +92,25 @@ export const guestLogin = async (req: express.Request, res: express.Response) =>
     if (req.cookies.token) {
       return res.status(401).json({ message: "User Already LoggedIN" });
     }
-    const guestEmail = "guest@connectly.com";
-    let user = await getUserByEmail(guestEmail);
+
+    const guest = getGuestIdentity(req);
+    let user = await getUserByEmail(guest.email);
 
     if (!user) {
       user = await createUser({
-        username: `guest_${Math.floor(Math.random() * 10000)}`,
-        email: guestEmail,
-        password: "GuestPassword123!",
+        username: guest.username,
+        email: guest.email,
       });
     }
 
     const jwtToken = generateToken(user.id);
+    res.cookie(guestCookieName, guest.guestKey, {
+      ...authCookieOptions,
+      maxAge: authCookieMaxAge,
+    });
     res.cookie("token", jwtToken, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "none",
-      path: "/",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
+      ...authCookieOptions,
+      maxAge: authCookieMaxAge,
     });
 
     return res.status(200).json(user);
@@ -103,18 +125,14 @@ export const logout = async (req: express.Request, res: express.Response) => {
     if (!req.cookies.token) {
       return res.status(401).json({ message: "Invalid req" });
     }
-    res.clearCookie("token", {
-      httpOnly: true,
-      secure: true,
-      sameSite: "none",
-      path: "/",
-    });
+    res.clearCookie("token", authCookieOptions);
     res.status(200).json({ message: "Successfully logout" });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: "Something went wrong" });
   }
 };
+
 export const isLoggedIn = async (
   req: express.Request,
   res: express.Response
@@ -143,7 +161,10 @@ export const isLoggedIn = async (
   }
 };
 
-export const checkUsernameAvailability = async (req: express.Request, res: express.Response) => {
+export const checkUsernameAvailability = async (
+  req: express.Request,
+  res: express.Response
+) => {
   try {
     const { username } = req.query;
     if (!username || typeof username !== "string" || username.trim().length === 0) {
